@@ -1,0 +1,197 @@
+diff --git a/fuzzers/afl/fetch.sh b/fuzzers/afl/fetch.sh
+index c2ca3be3..ca1cb7a6 100755
+--- a/fuzzers/afl/fetch.sh
++++ b/fuzzers/afl/fetch.sh
+@@ -11,3 +11,5 @@ git -C "$FUZZER/repo" checkout fab1ca5ed7e3552833a18fc2116d33a9241699bc
+ #wget -O "$FUZZER/repo/afl_driver.cpp" \
+ #    "https://cs.chromium.org/codesearch/f/chromium/src/third_party/libFuzzer/src/afl/afl_driver.cpp"
+ cp "$FUZZER/src/afl_driver.cpp" "$FUZZER/repo/afl_driver.cpp"
++
++git -C "$FUZZER/repo" apply "$FUZZER/src/log-execs.patch"
+diff --git a/fuzzers/afl/run.sh b/fuzzers/afl/run.sh
+index 077ba44b..f20c37aa 100755
+--- a/fuzzers/afl/run.sh
++++ b/fuzzers/afl/run.sh
+@@ -15,5 +15,7 @@ mkdir -p "$SHARED/findings"
+ 
+ export AFL_SKIP_CPUFREQ=1
+ export AFL_NO_AFFINITY=1
+-"$FUZZER/repo/afl-fuzz" -m 100M -i "$TARGET/corpus/$PROGRAM" -o "$SHARED/findings" \
+-    $FUZZARGS -- "$OUT/$PROGRAM" $ARGS 2>&1
++"$FUZZER/repo/afl-fuzz" -t 1000+ -m 100M -i "$TARGET/corpus/$PROGRAM" -o "$SHARED/findings" \
++    -M fuzzer-01 $FUZZARGS -- "$OUT/$PROGRAM" $ARGS 2>&1 &
++"$FUZZER/repo/afl-fuzz" -t 1000+ -m 100M -i "$TARGET/corpus/$PROGRAM" -o "$SHARED/findings" \
++    -S fuzzer-02 $FUZZARGS -- "$OUT/$PROGRAM" $ARGS 2>&1 &
+diff --git a/fuzzers/aflplusplus/run.sh b/fuzzers/aflplusplus/run.sh
+index c2f1c100..2e814eb2 100755
+--- a/fuzzers/aflplusplus/run.sh
++++ b/fuzzers/aflplusplus/run.sh
+@@ -21,6 +21,9 @@ export AFL_NO_UI=1
+ export AFL_MAP_SIZE=256000
+ export AFL_DRIVER_DONT_DEFER=1
+ 
+-"$FUZZER/repo/afl-fuzz" -i "$TARGET/corpus/$PROGRAM" -o "$SHARED/findings" \
++"$FUZZER/repo/afl-fuzz" -t 1000+ -i "$TARGET/corpus/$PROGRAM" -o "$SHARED/findings" \
+     "${flag_cmplog[@]}" -d \
+-    $FUZZARGS -- "$OUT/afl/$PROGRAM" $ARGS 2>&1
++    -M fuzzer-01 $FUZZARGS -- "$OUT/afl/$PROGRAM" $ARGS 2>&1 &
++"$FUZZER/repo/afl-fuzz" -t 1000+ -i "$TARGET/corpus/$PROGRAM" -o "$SHARED/findings" \
++    "${flag_cmplog[@]}" -d \
++    -S fuzzer-02 $FUZZARGS -- "$OUT/afl/$PROGRAM" $ARGS 2>&1 &
+diff --git a/magma/run.sh b/magma/run.sh
+index d6fcdd53..50f3cf52 100755
+--- a/magma/run.sh
++++ b/magma/run.sh
+@@ -25,15 +25,17 @@ mkdir -p "$MONITOR"
+ cd "$SHARED"
+ 
+ # prune the seed corpus for any fault-triggering test-cases
+-for seed in "$TARGET/corpus/$PROGRAM"/*; do
+-    out="$("$MAGMA"/runonce.sh "$seed")"
+-    code=$?
++if [ ! -z $NO_PRUNE ]; then
++    for seed in "$TARGET/corpus/$PROGRAM"/*; do
++        out="$("$MAGMA"/runonce.sh "$seed")"
++        code=$?
+ 
+-    if [ $code -ne 0 ]; then
+-        echo "$seed: $out"
+-        rm "$seed"
+-    fi
+-done
++        if [ $code -ne 0 ]; then
++            echo "$seed: $out"
++            rm "$seed"
++        fi
++    done
++fi
+ 
+ shopt -s nullglob
+ seeds=("$1"/*)
+@@ -68,8 +70,10 @@ done &
+ 
+ echo "Campaign launched at $(date '+%F %R')"
+ 
+-timeout $TIMEOUT "$FUZZER/run.sh" | \
+-    multilog n2 s$LOGSIZE "$SHARED/log"
++timeout $TIMEOUT bash -c '
++    "$FUZZER/run.sh" | \
++        multilog n2 s$LOGSIZE "$SHARED/log"
++'
+ 
+ if [ -f "$SHARED/log/current" ]; then
+     cat "$SHARED/log/current"
+@@ -77,4 +81,10 @@ fi
+ 
+ echo "Campaign terminated at $(date '+%F %R')"
+ 
++# XXX This should be in a fuzzer-specific post-processing script
++python3 "$FUZZER/src/timestamp_findings.py" -o "$SHARED/fuzzer-01-timestamps.csv" -- \
++    "$SHARED/findings/fuzzer-01"
++python3 "$FUZZER/src/timestamp_findings.py" -o "$SHARED/fuzzer-02-timestamps.csv" -- \
++    "$SHARED/findings/fuzzer-02"
++
+ kill $(jobs -p)
+diff --git a/targets/php/build.sh b/targets/php/build.sh
+index 26f2e2d6..131d83fd 100755
+--- a/targets/php/build.sh
++++ b/targets/php/build.sh
+@@ -47,16 +47,7 @@ popd
+ 
+ make -j$(nproc)
+ 
+-# Generate seed corpora
+-sapi/cli/php sapi/fuzzer/generate_unserialize_dict.php
+-sapi/cli/php sapi/fuzzer/generate_parser_corpus.php
+-
+ FUZZERS="php-fuzz-json php-fuzz-exif php-fuzz-mbstring php-fuzz-unserialize php-fuzz-parser"
+ for fuzzerName in $FUZZERS; do
+ 	cp sapi/fuzzer/$fuzzerName "$OUT/${fuzzerName/php-fuzz-/}"
+ done
+-
+-for fuzzerName in `ls sapi/fuzzer/corpus`; do
+-    mkdir -p "$TARGET/corpus/${fuzzerName}"
+-    cp sapi/fuzzer/corpus/${fuzzerName}/* "$TARGET/corpus/${fuzzerName}/"
+-done
+diff --git a/tools/captain/captainrc b/tools/captain/captainrc
+index 466d2164..098931fe 100644
+--- a/tools/captain/captainrc
++++ b/tools/captain/captainrc
+@@ -10,7 +10,7 @@
+ WORKDIR=./workdir
+ 
+ # REPEAT: number of campaigns to run per program (per fuzzer)
+-REPEAT=3
++REPEAT=30
+ 
+ # [WORKER_MODE]: defines the type of CPU resources to allocate (default: 1)
+ # - 1: logical cores (possibly SMT-enabled)
+@@ -25,22 +25,22 @@ REPEAT=3
+ # WORKER_POOL="1 3 5 7 9"
+ 
+ # [CAMPAIGN_WORKERS]: number of workers to allocate for a campaign (default: 1)
+-# CAMPAIGN_WORKERS=1
++CAMPAIGN_WORKERS=2
+ 
+ # [TIMEOUT]: time to run each campaign. This variable supports one-letter
+ # suffixes to indicate duration (s: seconds, m: minutes, h: hours, d: days)
+ # (default: 1m)
+-TIMEOUT=24h
++TIMEOUT=18h
+ 
+ # [POLL]: time (in seconds) between polls (default: 5)
+ POLL=5
+ 
+ # [CACHE_ON_DISK]: if set, the cache workdir is mounted on disk instead of
+ # in-memory (default: unset)
+-# CACHE_ON_DISK=1
++CACHE_ON_DISK=1
+ 
+ # [NO_ARCHIVE]: if set, campaign workdirs will not be tarballed (default: unset)
+-# NO_ARCHIVE=1
++NO_ARCHIVE=1
+ 
+ # [TMPFS_SIZE]: the size of the tmpfs mounted volume. This only applies when
+ # CACHE_ON_DISK is not set (default: 50g)
+@@ -65,23 +65,40 @@ POLL=5
+ # (default: unset)
+ # POC_EXTRACT=1
+ 
++# [NO_PRUNE]: if set, do not prune the seed corpus for any fault-triggering
++# test-cases (default: unset)
++NO_PRUNE=1
++
+ 
+ ###
+ ## Campaigns to run
+ ###
+ 
+ # FUZZERS: an array of fuzzer names (from magma/fuzzers/*) to evaluate
+-FUZZERS=(afl aflfast moptafl aflplusplus fairfuzz honggfuzz)
++FUZZERS=(afl aflplusplus )
+ 
+ # [fuzzer_TARGETS]: an array of target names (from magma/targets/*) to fuzz with
+ # `fuzzer`. The `fuzzer` prefix is a fuzzer listed in the FUZZERS array
+ # (default: all targets)
+ # afl_TARGETS=(libpng libtiff libxml2)
++afl_TARGETS=(libpng libtiff libxml2 php poppler)
++aflplusplus_TARGETS=(libpng libtiff libxml2 php poppler)
+ 
+ # [fuzzer_target_PROGRAMS]: an array of program names (from
+ # magma/targets/target/configrc) to use as execution drivers when fuzzing the
+ # `target`
+ # afl_libtiff_PROGRAMS=(tiffcp)
++afl_libpng_PROGRAMS=(libpng_read_fuzzer)
++afl_libtiff_PROGRAMS=(tiff_read_rgba_fuzzer)
++afl_libxml2_PROGRAMS=(libxml2_xml_reader_for_file_fuzzer)
++afl_php_PROGRAMS=(exif json parser)
++afl_poppler_PROGRAMS=(pdf_fuzzer)
++
++aflplusplus_libpng_PROGRAMS=(libpng_read_fuzzer)
++aflplusplus_libtiff_PROGRAMS=(tiff_read_rgba_fuzzer)
++aflplusplus_libxml2_PROGRAMS=(libxml2_xml_reader_for_file_fuzzer)
++aflplusplus_php_PROGRAMS=(exif json parser)
++aflplusplus_poppler_PROGRAMS=(pdf_fuzzer)
+ 
+ # [fuzzer_target_FUZZARGS]: a string containing fuzzer/target-specific arguments
+ # when fuzzing `target` with `fuzzer`

@@ -1,0 +1,87 @@
+# This file describes the AFL arguments for the targets in two of our three
+# benchmarks (Google FTS, and a set of real-world programs). Magma is not 
+# included because we just use the default run configuration.
+#
+# Author: Adrian Herrera
+
+[fts]
+
+[fts.freetype2]
+memory = 600
+args = "-1"
+
+[fts.guetzli]
+memory = 1024
+timeout = 5000
+args = "-1"
+
+[fts.json]
+memory = 800
+args = "-1"
+
+[fts.libarchive]
+memory = 800
+args = "-1"
+
+[fts.libjpeg-turbo]
+memory = 800
+args = "-1"
+
+[fts.libpng]
+memory = 800
+args = "-1"
+
+[fts.libxml2]
+memory = 800
+args = "-1"
+
+[fts.pcre2]
+memory = 800
+args = "-1"
+
+[fts.re2]
+memory = 800
+args = "-1"
+
+[fts.vorbis]
+memory = 800
+args = "-1"
+
+[real-world]
+
+[real-world.freetype2]
+driver = "char2svg"
+memory = 600
+args = "@@ @"
+
+[real-world.librsvg]
+driver = "rsvg-convert"
+memory = 800
+timeout = 3500
+args = "-o /dev/null @@"
+
+[real-world.libtiff]
+driver = "tiff2pdf"
+memory = 800
+args = "-o /dev/null @@"
+
+[real-world.libxml2]
+driver = "xmllint"
+memory = 600
+args = "-o /dev/null @@"
+
+[real-world.poppler]
+driver = "pdftotext"
+memory = 850
+timeout = 3500
+args = "@@ /dev/null"
+
+[real-world.sox.mp3]
+driver = "sox"
+memory = 800
+args = "--single-threaded @@ -b 16 -t aiff /dev/null channels 1 rate 16k fade 3 norm"
+
+[real-world.sox.wav]
+driver = "sox"
+memory = 800
+args = "--single-threaded @@ -b 16 -t aiff /dev/null channels 1 rate 16k fade 3 norm"

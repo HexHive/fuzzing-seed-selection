@@ -1,0 +1,30 @@
+# Regular expressions for triaging/deduplicating Google FTS bugs. The regexs
+# basically match on ASan reports.
+#
+# Author: Adrian Herrera
+
+[guetzli]
+a = "output_image\.cc:398.*?Assertion \`coeff % quant == 0\' failed\."
+
+[json]
+a = "fuzzer-parse_json\.cpp:50.*?Assertion \`s1 == s2\' failed\."
+
+[libarchive]
+a = "heap-buffer-overflow"
+
+[libxml2]
+a = "READ of size .+? xmlParseXMLDecl .+? xmlParseDocument .+? xmlDoRead"
+b = "READ of size .+? xmlDictComputeFastQKey .+? xmlDictQLookup .+? xmlSAX2StartElementNs .+? xmlParseStartTag2 .+? xmlParseElement"
+c = "READ of size .+? xmlDictComputeFastKey .+? xmlDictLookup .+? xmlParseNCNameComplex"
+
+[pcre2]
+a = "READ of size .+? match .+?pcre2_match\.c:5968:11.+? pcre2_match_8 .+? regexec"
+b = "READ of size .+? match .+?pcre2_match\.c:1426:16"
+
+[re2]
+b = "WRITE of size .+? re2::NFA::Search\(.+? re2::Prog::SearchNFA\(.+? re2::RE2::Match\(.+? re2::RE2::DoMatch\("
+
+[vorbis]
+a = "READ of size .+? vorbis_book_decodevv_add .+? res2_inverse .+? mapping0_inverse"
+b = "READ of size .+? vorbis_book_decodev_add .+? _01inverse .+? res1_inverse .+? mapping0_inverse"
+c = "SEGV on unknown address .+? _01inverse .+? res1_inverse .+? mapping0_inverse"
