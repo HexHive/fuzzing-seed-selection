@@ -23,6 +23,8 @@ from fuzz_analysis.fuzzers.afl.plot_data import PlotData
 def parse_args() -> Namespace:
     """Parse command-line arguments."""
     parser = ArgumentParser(description='Calculate AUC of AFL coverage')
+    parser.add_argument('-p', '--percentile', type=int, default=100,
+                        help='Coverage percentile')
     parser.add_argument('plot_data', nargs='+', type=Path,
                         help='Path to AFL plot_data file(s)')
     return parser.parse_args()
@@ -48,7 +50,13 @@ def main():
 
             df['unix_time'] = df.unix_time - df.unix_time.iloc[0]
 
-            auc = metrics.auc(df.unix_time, df.map_size)
+            total_cov = df.map_size.iloc[-1]
+            percentile_cov = total_cov * args.percentile / 100.0
+            df_percentile = df[df.map_size <= percentile_cov]
+            if len(df_percentile) == 1:
+                df_percentile = df[0:2]
+
+            auc = metrics.auc(df_percentile.unix_time, df_percentile.map_size)
             aucs.append(auc)
 
     # Compute the mean AUC and confidence intervals
