@@ -18,6 +18,11 @@ Generate a [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)
 plot for a given seed set (stored in an HDF5 file, such as those stored on
 [OSF](https://osf.io/hz8em)).
 
+## coverage_auc.py
+
+Compute the area under curve (AUC) of AFL coverage data (stored in `plot_data`
+files).
+
 ## eval_maxsat.py
 
 Run [EvalMaxSAT](https://github.com/FlorentAvellaneda/EvalMaxSAT) over a WCNF

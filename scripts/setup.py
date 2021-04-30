@@ -13,6 +13,7 @@ setup(
         'bin/afl_cmin.py',
         'bin/afl_coverage_merge.py',
         'bin/afl_coverage_pca.py',
+        'bin/coverage_auc.py',
         'bin/expand_hdf5_coverage.py',
         'bin/fuzz.py',
         'bin/get_corpus.py',

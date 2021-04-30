@@ -45,8 +45,8 @@ def main():
     cov_ci = bs.bootstrap(regions, stat_func=bs_stats.mean)
 
     # Output
-    print('mean coverage (%d trials)' % len(regions))
-    print(f'{cov_ci.value:.02f} +/- {cov_ci.error_width() / 2:.02f}')
+    print(f'mean coverage ({len(regions)} trials)')
+    print(f'  {cov_ci.value:.02f} +/- {cov_ci.error_width() / 2:.02f}')
 
 
 if __name__ == '__main__':
