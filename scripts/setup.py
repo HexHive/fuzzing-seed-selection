@@ -38,6 +38,7 @@ setup(
         'pyelftools',
         'scikit-learn==0.23.2',
         'bootstrapped',
+        'scikit-learn',
         'supervenn',
         'tabulate',
         'toml',
