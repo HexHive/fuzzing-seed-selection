@@ -36,7 +36,6 @@ setup(
         'numpy',
         'osfclient',
         'pyelftools',
-        'scikit-learn==0.23.2',
         'bootstrapped',
         'scikit-learn',
         'supervenn',

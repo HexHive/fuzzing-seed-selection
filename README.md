@@ -27,10 +27,6 @@ pip3 install wheel
 # Get this repo
 git clone https://github.com/HexHive/fuzzing-seed-selection
 pip3 install fuzzing-seed-selection/scripts
-
-# Get MoonBeam
-git clone https://gitlab.anu.edu.au/lunar/moonbeam
-pip3 install moonbeam
 ```
 
 ### Build OptiMin
