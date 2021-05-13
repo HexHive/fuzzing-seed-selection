@@ -8,7 +8,8 @@ provide the necessary infrastructure to reproduce our fuzzing experiments.
 
 ### Setup your environment
 
-Set up your environment (assumes a modern Ubuntu OS, >= 18.04):
+Set up your environment (assumes a modern Ubuntu OS, `>= 18.04`, and Python,
+`>= 3.6`):
 
 ```bash
 # Install prerequisites
@@ -61,9 +62,9 @@ coverage:
 1. Download the coverage HDF5 from `afl-showmap-coverage/fts/freetype2.hdf5`
    [here](https://osf.io/hz8em).
 
-   Alternatively, you could also use the [osfclient](https://osfclient.readthedocs.io/en/stable/)
-   (installed into the `seed_selection` virtualenv), but this can be very slow
-   (up to 10-12 minutes)
+   Alternatively, you could also use the
+   [osfclient](https://osfclient.readthedocs.io/en/stable/) (installed into the
+   `seed_selection` virtualenv), but this can be very slow (up to 10-12 minutes)
 
    ```bash
    osf -p hz8em fetch afl-showmap-coverage/fts/freetype2.hdf5
@@ -73,18 +74,57 @@ coverage:
 
    ```bash
    expand_hdf5_coverage.py -i freetype2.hdf5 -o /tmp/freetype2
+
+   # Expected output:
+   #
+   # 466 seeds to extract
+   # Expanding freetype2.hdf5: 100%
    ```
 1. Perform an unweighted minimization based on edges only (not hit counts)
 
    ```bash
    docker run -v /tmp/freetype2:/tmp/freetype2   \
      seed-selection/optimin -e /tmp/freetype2
+
+   # Expected output:
+   #
+   # afl-showmap corpus minimization
+   #
+   # [############################################################] 100% Reading seed coverage
+   # [############################################################] 100% Generating clauses
+   # [*] Running Optimin on /tmp/freetype2
+   # [*] Running EvalMaxSAT on WCNF
+   # [+] EvalMaxSAT completed
+   # [*] Parsing EvalMaxSAT output
+   # [+] Solution found for /tmp/freetype2
+   # 
+   # [+] Total time: 0.01 sec
+   # [+] Num. seeds: 37
+   #
+   # ...
    ```
 1. Perform an unweighted minimization including edge hit counts
 
    ```bash
    docker run -v /tmp/freetype2:/tmp/freetype2  \
      seed-selection/optimin /tmp/freetype2
+
+   # Expected output:
+   #
+   # afl-showmap corpus minimization
+   #
+   # [############################################################] 100% Reading seed coverage
+   # [############################################################] 100% Generating clauses
+   # [*] Running Optimin on /tmp/freetype2
+   # [*] Running EvalMaxSAT on WCNF
+   # [+] EvalMaxSAT completed
+   # [*] Parsing EvalMaxSAT output
+   # [+] Solution found for /tmp/freetype2
+   #
+   # [+] Total time: 0.01 sec
+   # [+] Num. seeds: 53
+   #
+   # ...
    ```
 1. Download the file weights (i.e., sizes) from `weights/ttf.csv`
    [here](https://osf.io/hz8em).
@@ -99,6 +139,25 @@ coverage:
    ```bash
    docker run -v /tmp/freetype2:/tmp/freetype2 -v $(pwd):/tmp   \
      seed-selection/optimin -e -w /tmp/ttf.csv /tmp/freetype2
+
+   # Expected output:
+   #
+   # afl-showmap corpus minimization
+   #
+   # [*] Reading weights from `/tmp/ttf.csv`... 0s
+   # [############################################################] 100% Calculating top
+   # [############################################################] 100% Reading seed coverage
+   # [############################################################] 100% Generating clauses
+   # [*] Running Optimin on /tmp/freetype2
+   # [*] Running EvalMaxSAT on WCNF
+   # [+] EvalMaxSAT completed
+   # [*] Parsing EvalMaxSAT output
+   # [+] Solution found for /tmp/freetype2
+   #
+   # [+] Total time: 0.01 sec
+   # [+] Num. seeds: 37
+   #
+   # ...
    ```
 
 ## Detailed Description
