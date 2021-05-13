@@ -8,8 +8,8 @@ provide the necessary infrastructure to reproduce our fuzzing experiments.
 
 ### Setup your environment
 
-Set up your environment (assumes a modern Ubuntu OS, `>= 18.04`, and Python,
-`>= 3.6`):
+Set up your environment (assumes a modern Ubuntu OS, `>= 18.04 && <= 20.04`,
+and Python, `>= 3.6 && <= 3.8`):
 
 ```bash
 # Install prerequisites
