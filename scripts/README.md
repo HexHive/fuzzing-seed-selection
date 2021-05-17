@@ -66,6 +66,11 @@ Replay a directory of inputs seeds and generate coverage information. This
 coverage information is stored in an HDF5 (as stored on
 [OSF](https://osf.io/hz8em)).
 
+## triage_crashes.py
+
+Replay AFL's `crashes` directory and match crash outputs to a regex (e.g., such
+as those provided [here](../fuzzing/config/fts-bug-regexs.toml).
+
 ## visualize_corpora.py
 
 Plot a "Venn diagram" (it's not really a Venn diagram) of different minimized
