@@ -145,6 +145,10 @@ def main():
             profraws = pool.map(get_profraw, seeds)
             logger.info('Generated %d coverage profiles', len(profraws))
 
+        if not profraws:
+            logger.warn('No coverage profiles generated')
+            return
+
         # Create list of seeds for merging
         logger.info('Generating seeds.txt...')
         seed_list = Path(temp_dir) / 'seeds.txt'
