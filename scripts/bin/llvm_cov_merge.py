@@ -11,7 +11,7 @@ from argparse import ArgumentParser, Namespace
 from functools import partial
 from pathlib import Path
 from random import randint
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, gettempdir
 from typing import List, Optional
 import json
 import logging
@@ -122,6 +122,17 @@ def export_json(target: Path, profdata: Path,
     return json.loads(proc.stdout)
 
 
+def get_temp_dir() -> Path:
+    """Determine temporary directory location. Prefer tmpfs if available."""
+    root = Path('/')
+    preferred_dirs = (root / 'dev' / 'shm', root / 'run' / 'shm')
+    for dir_ in preferred_dirs:
+        if dir_.exists():
+            return dir_
+
+    return Path(gettempdir())
+
+
 def main():
     """The main function."""
     args = parse_args()
@@ -135,7 +146,7 @@ def main():
     seeds = (seed for queue in in_dir.glob('**/queue') \
              for seed in queue.iterdir() if seed.is_file())
 
-    with TemporaryDirectory() as temp_dir:
+    with TemporaryDirectory(dir=get_temp_dir()) as temp_dir:
         # Generate raw coverage files
         with mpp.Pool(processes=args.jobs) as pool:
             logger.info('Generating raw coverage profiles from %s...', in_dir)
@@ -146,7 +157,7 @@ def main():
             logger.info('Generated %d coverage profiles', len(profraws))
 
         if not profraws:
-            logger.warn('No coverage profiles generated')
+            logger.warning('No coverage profiles generated')
             return
 
         # Create list of seeds for merging
