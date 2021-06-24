@@ -5,21 +5,17 @@ Author: Adrian Herrera
 """
 
 
-from io import BytesIO, TextIOWrapper
+from io import TextIOWrapper
+from pathlib import Path
 from typing import Dict, Optional, Set, TextIO
 import csv
 
-from . import cloudstor
+from . import datastore
 
 
 def _download_seed_size_csv():
-    client = cloudstor.connect()
-    bio = BytesIO()
-    client.download_from(bio, 'filesizes.csv')
-    bio.seek(0)
-    inf = TextIOWrapper(bio, encoding='utf-8')
-
-    return inf
+    content = datastore.get_file(Path('seeds') / 'filesizes.csv')
+    return TextIOWrapper(content, encoding='utf-8')
 
 
 def get_seed_sizes(seeds: Set[str],
@@ -27,8 +23,8 @@ def get_seed_sizes(seeds: Set[str],
     """
     Get the file sizes for the given seed set.
 
-    If the seed size CSV is provided, use it. Otherwise, download it from
-    cloudstor.
+    If the seed size CSV is provided, use it. Otherwise, download it from the
+    datastore.
     """
     # Download the seed sizes CSV if it was not provided
     if not csv_file:

@@ -10,7 +10,6 @@ Author: Adrian Herrera
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import TextIO
-import os
 
 from sklearn import metrics
 import bootstrapped.bootstrap as bs

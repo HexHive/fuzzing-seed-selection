@@ -59,15 +59,11 @@ archives.
 For example, to perform a corpus minimization base on Google FTS FreeType2
 coverage:
 
-1. Download the coverage HDF5 from `afl-showmap-coverage/fts/freetype2.hdf5`
-   [here](https://osf.io/hz8em).
-
-   Alternatively, you could also use the
-   [osfclient](https://osfclient.readthedocs.io/en/stable/) (installed into the
-   `seed_selection` virtualenv), but this can be very slow (up to 10-12 minutes)
+1. Download the coverage HDF5 from
+   [here](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/afl-showmap-coverage/fts/freetype2.hdf5).
 
    ```bash
-   osf -p hz8em fetch afl-showmap-coverage/fts/freetype2.hdf5
+   wget https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/afl-showmap-coverage/fts/freetype2.hdf5
    ```
 1. Expand the HDF5 using the
    [`expand_hdf5_coverage.py`](scripts/bin/expand_hdf5_coverage.py) script
@@ -126,13 +122,11 @@ coverage:
    #
    # ...
    ```
-1. Download the file weights (i.e., sizes) from `weights/ttf.csv`
-   [here](https://osf.io/hz8em).
-
-   Again, you can use osfclient (this can take up to 10 minutes)
+1. Download the file weights (i.e., sizes) from
+   [here](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/weights/ttf.csv).
 
    ```bash
-   osf -p hz8em fetch weights/ttf.csv
+   wget https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/weights/ttf.csv
    ```
 1. Perform a weighted minimization based on file size and edges only
 
@@ -165,15 +159,8 @@ coverage:
 ### Additional Files
 
 The sizes of our collection corpora mean that we cannot store them in a Git
-repo. Instead, we store ancillary data at
-
-1. [Cloudstor](https://cloudstor.aarnet.edu.au/plus/s/7i8vPklNDO5RL5g). The
-   actual seed files are stored here.
-1. [OSF](https://osf.io/hz8em). This contains the compiled binaries that we
-   fuzzed with, `afl-showmap` coverage (so that you do not have to trace each
-   seeds coverage yourself), and the various corpora fuzzed in our paper (OSF
-   just stores text files listing the names of the seeds in each corpus. The
-   seeds themselves are stored on Cloudstor).
+repo. Instead, we store ancillary data at ANU's DataCommons repository,
+available [here](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/).
 
 ### Tracing Code Coverage
 
@@ -212,8 +199,8 @@ FILE_5,WEIGHT
 Where `FILE_1`, `FILE_2`, ... corresponds to the name of a file within the
 corpus directory (only the filename needs to be provided: the corpus directory
 path should **not** be provided), and `WEIGHT` is an unsigned integer >= 1. We
-provide weights for our collection corpora [here](https://osf.io/hz8em/) (under
-the `weights` directory).
+provide weights for our collection corpora
+[here](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/weights/).
 
 #### `afl-cmin`
 

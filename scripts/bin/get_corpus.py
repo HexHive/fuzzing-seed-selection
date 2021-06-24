@@ -8,10 +8,10 @@ Author: Adrian Herrera
 
 
 from argparse import ArgumentParser, Namespace
-from io import BytesIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from tarfile import TarFile
-from tempfile import TemporaryDirectory, TemporaryFile
+from tempfile import TemporaryDirectory
 from typing import Set
 import logging
 import shutil
@@ -21,7 +21,7 @@ from tqdm import tqdm
 from seed_selection import BENCHMARKS, CORPORA, TARGET_FILE_TYPES
 from seed_selection.argparse import log_level, path_exists
 from seed_selection.log import get_logger
-from seed_selection import cloudstor, osf
+from seed_selection import datastore
 
 
 logger = get_logger('get_corpus')
@@ -46,23 +46,19 @@ def parse_args() -> Namespace:
 
 def get_seeds(benchmark: str, target: str, corpus: str) -> Set[Path]:
     """Get the list of seeds for the given corpus."""
-    logger.info('Getting seed list from OSF')
-    store = osf.connect()
+    logger.info('Getting seed list from datastore')
 
     # Get the corpus file
     seed_path = Path('corpora') / benchmark / target / f'{corpus}.txt'
-    seed_file = osf.get_file(store, seed_path)
-    logger.debug('Found corpus file `%s`', seed_file.path)
+    seed_data = datastore.get_file(seed_path).decode('utf-8')
+    logger.debug('Downloaded corpus seed file')
 
-    # Now create the paths to the seeds (which are stored in cloudstor)
+    # Now create the paths to the seeds
     filetype = TARGET_FILE_TYPES[benchmark][target]
     seeds = set()
-    with TemporaryFile('r+b') as outf:
-        seed_file.write_to(outf)
-
-        outf.seek(0)
-        for line in outf:
-            seed = line.strip().decode('utf-8')
+    with StringIO(seed_data) as inf:
+        for line in inf:
+            seed = line.strip()
             seeds.add(Path(filetype) / seed)
     logger.info('Read %d seeds from seed list', len(seeds))
 
@@ -95,13 +91,10 @@ def main():
         seeds = get_seeds(benchmark, target, corpus)
         archive_name = '%s.tar.xz' % filetype
 
-    # Connect to cloudstor and download seeds
-    client = cloudstor.connect()
-    with BytesIO() as bio:
-        logger.info('Downloading %s', archive_name)
-        client.download_from(bio, archive_name)
-        bio.seek(0)
-
+    # Download seeds
+    logger.info('Downloading %s', archive_name)
+    data = datastore.get_file(Path('seeds') / archive_name, progbar=True)
+    with BytesIO(data) as bio:
         logger.info('Extracting seeds from %s', archive_name)
         with TarFile.open(fileobj=bio, mode='r:xz') as tf, \
                 TemporaryDirectory() as td:

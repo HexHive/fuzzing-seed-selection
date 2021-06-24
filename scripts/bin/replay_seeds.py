@@ -14,7 +14,6 @@ from shutil import copy, which
 from subprocess import run
 from tempfile import NamedTemporaryFile
 from time import time
-from typing import List, Tuple
 import re
 
 from h5py import File as H5File

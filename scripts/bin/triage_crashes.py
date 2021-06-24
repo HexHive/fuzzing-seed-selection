@@ -97,9 +97,9 @@ def load_is_bug_func(path):
 
     try:
         is_bug_func = getattr(mod, 'is_bug')
-    except AttributeError:
+    except AttributeError as e:
         raise Exception('%s does not contain an `is_bug(stdout, stderr)` '
-                        'function' % path)
+                        'function' % path) from e
 
     if not callable(is_bug_func):
         raise Exception('`is_bug` is not a function')

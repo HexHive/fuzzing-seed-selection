@@ -35,7 +35,6 @@ setup(
         'lifelines',
         'matplotlib',
         'numpy',
-        'osfclient',
         'pandas',
         'pyelftools',
         'bootstrapped',
@@ -45,7 +44,7 @@ setup(
         'toml',
         'tqdm',
         'watchdog',
-        'webdavclient3',
+        'requests',
         'moonbeam @ git+https://gitlab.anu.edu.au/lunar/moonbeam.git#egg=moonbeam',
     ],
 )

@@ -15,8 +15,8 @@ from multiple AFL parallel nodes.
 ## afl_coverage_pca.py
 
 Generate a [PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)
-plot for a given seed set (stored in an HDF5 file, such as those stored on
-[OSF](https://osf.io/hz8em)).
+plot for a given seed set (stored in an HDF5 file, such as those stored
+[here](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/)).
 
 ## coverage_auc.py
 
@@ -31,8 +31,8 @@ produced by `afl-showmap-maxsat` to compute an optimum corpus.
 ## expand_hdf5_coverage.py
 
 Extract [`afl-showmap`](https://github.com/google/AFL/blob/master/afl-showmap.c)
-style bitmaps from an HDF5 file containing AFL coverage (as stored on
-[OSF](https://osf.io/hz8em/)).
+style bitmaps from an HDF5 file containing AFL coverage (as stored
+[here](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/)).
 
 ## fuzz.py
 
@@ -42,7 +42,7 @@ AFL (e.g., crashes, queue entries).
 
 ## get_corpus.py
 
-Download a corpus of seeds from [cloudstor](https://cloudstor.aarnet.edu.au/)
+Download a corpus of seeds from our [datastore](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/)
 based on a given minimization technique (e.g., optimal, afl-cmin).
 
 ## get_libs.py
@@ -63,8 +63,8 @@ paper. Prints the selected seeds.
 ## replay_seeds.py
 
 Replay a directory of inputs seeds and generate coverage information. This
-coverage information is stored in an HDF5 (as stored on
-[OSF](https://osf.io/hz8em)).
+coverage information is stored in an HDF5 (as stored
+[here](https://datacommons.anu.edu.au/DataCommons/rest/records/anudc:6106/data/)).
 
 ## triage_crashes.py
 
