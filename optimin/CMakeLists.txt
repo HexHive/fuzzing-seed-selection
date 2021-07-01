@@ -19,7 +19,6 @@ endif(USE_Z3)
 find_package(Boost COMPONENTS container REQUIRED)
 message(STATUS "Found Boost ${Boost_VERSION_STRING}")
 
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3")
 
 include_directories(${Boost_INCLUDE_DIR})
