@@ -1,8 +1,9 @@
 # Seed Selection for Successful Fuzzing
 
-The artifact associated with our ISSTA 2021 paper "Seed Selection for Successful
-Fuzzing". While our primary artifact is the OptiMin corpus minimizer, we also
-provide the necessary infrastructure to reproduce our fuzzing experiments.
+The artifact associated with our ISSTA 2021 paper "[Seed Selection for
+Successful Fuzzing](https://hexhive.epfl.ch/publications/files/21ISSTA2.pdf)".
+While our primary artifact is the OptiMin corpus minimizer, we also provide the
+necessary infrastructure to reproduce our fuzzing experiments.
 
 ## Getting Started
 
